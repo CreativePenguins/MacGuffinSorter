@@ -70,13 +70,21 @@ namespace MacGuffinSorter
                 int destCount = 0;
                 // This is grabbing the categories that are possible based on the product number
                 possibleCategories = from c in categories where c.productNumber.ToLower().Trim() == photo.productNumber.ToLower().Trim() select c;
-
+                // If there's only one possible category then just move it. Don't bother with the rest.
+                if(possibleCategories.Count() == 1){
+                    defaultDestination = possibleCategories.First().folderPath;
+                    File.Move(photo.filePath, defaultDestination + Path.DirectorySeparatorChar + photo.fileName + ".jpg");
+                    continue;
+                }
                 // Looping through each possible category
                 foreach(Category c in possibleCategories){
                     if(c.metadataList.Count == 0){
                         // Sets the default destination based on how many metadata tags it has.
                         defaultDestination = c.folderPath;
                     }
+                    // If the photo doens't have any metadata then it stops here so extra code isn't needed.
+                    if (photo.metadataList.Count == 0)
+                        continue;
                     // Setting a counter to 0 to compare to the destination counter
                     int count = 0;
                     // Taking every metadata tag and comparing it to the possible metadata tags in the category.
